@@ -1,3 +1,4 @@
+#include "qjs_compat.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -5,7 +6,7 @@
 #include "log_util.h"
 
 char *js_array_join(JSContext *context, JSValue array, const char *separator) {
-    if (!JS_IsArray(context, array) || separator == NULL) {
+    if (!QJS_IS_ARRAY(context, array) || separator == NULL) {
         return NULL;
     }
 

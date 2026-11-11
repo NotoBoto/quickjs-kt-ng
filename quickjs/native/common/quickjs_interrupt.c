@@ -95,7 +95,15 @@ int qjs_interrupt_check_or_throw(JSContext *ctx, void *state) {
     // Replace any pending (catchable) error, e.g. one raised by a host callback.
     JS_FreeValue(ctx, JS_GetException(ctx));
     JS_ThrowInternalError(ctx, "interrupted");
+#ifdef QJS_NG
+    {
+        JSValue exc = JS_GetException(ctx);
+        JS_SetUncatchableError(ctx, exc);
+        JS_Throw(ctx, exc);
+    }
+#else
     JS_SetUncatchableException(ctx, 1);
+#endif
     return 1;
 }
 
@@ -115,7 +123,15 @@ static char *qjs_abort_module_normalize(JSContext *ctx,
     (void) module_name;
     (void) opaque;
     JS_ThrowInternalError(ctx, "interrupted");
+#ifdef QJS_NG
+    {
+        JSValue exc = JS_GetException(ctx);
+        JS_SetUncatchableError(ctx, exc);
+        JS_Throw(ctx, exc);
+    }
+#else
     JS_SetUncatchableException(ctx, 1);
+#endif
     return NULL;
 }
 

@@ -1,3 +1,4 @@
+#include "qjs_compat.h"
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -469,11 +470,11 @@ jobject js_value_to_jobject(JNIEnv *env, JSContext *context, JSValue value) {
         return java_buffer;
     }
 
-    if (JS_IsArray(context, value)) {
+    if (QJS_IS_ARRAY(context, value)) {
         return to_java_list(env, context, value);
     }
 
-    if (JS_IsError(context, value)) {
+    if (QJS_IS_ERROR(context, value)) {
         return js_error_to_java_error(env, context, value);
     }
 

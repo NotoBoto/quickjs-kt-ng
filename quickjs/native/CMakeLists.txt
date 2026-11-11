@@ -102,14 +102,24 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 
 # QuickJS version define, Gradle cmake cFlags doesn't work on Windows (maybe)
-file(READ "quickjs/VERSION" VERSION_CONTENT)
+# Unison fork: engine switch (ng = quickjs-ng 0.12.1, bellard = upstream submodule)
+if (NOT DEFINED QJS_ENGINE)
+    set(QJS_ENGINE "ng")
+endif ()
+if (QJS_ENGINE STREQUAL "ng")
+    set(QJS_DIR "quickjs-ng")
+    add_compile_definitions(QJS_NG)
+else ()
+    set(QJS_DIR "quickjs")
+endif ()
+file(READ "${QJS_DIR}/VERSION" VERSION_CONTENT)
 string(STRIP "${VERSION_CONTENT}" CONFIG_VERSION)
 add_compile_definitions(CONFIG_VERSION=\"${CONFIG_VERSION}\")
 
 # QuickJS BigNum
 add_compile_definitions(CONFIG_BIGNUM)
 
-include_directories("quickjs" "common")
+include_directories("${QJS_DIR}" "common")
 
 if (BUILD_WITH_JNI)
     include_directories(
@@ -119,12 +129,13 @@ if (BUILD_WITH_JNI)
 endif ()
 
 # QuickJS sources
+if (QJS_ENGINE STREQUAL "ng")
+    set(engine_sources "quickjs-ng/dtoa.c" "quickjs-ng/libregexp.c" "quickjs-ng/libunicode.c" "quickjs-ng/quickjs.c")
+else ()
+    set(engine_sources "quickjs/cutils.c" "quickjs/dtoa.c" "quickjs/libregexp.c" "quickjs/libunicode.c" "quickjs/quickjs.c")
+endif ()
 set(quickjs_sources
-        "quickjs/cutils.c"
-        "quickjs/dtoa.c"
-        "quickjs/libregexp.c"
-        "quickjs/libunicode.c"
-        "quickjs/quickjs.c"
+        ${engine_sources}
         "common/quickjs_version.c"
         "common/quickjs_interrupt.c"
 )

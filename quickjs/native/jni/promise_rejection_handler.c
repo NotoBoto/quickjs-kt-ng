@@ -9,7 +9,7 @@
 
 void promise_rejection_handler(JSContext *ctx, JSValue promise,
                                JSValue reason,
-                               int is_handled, void *opaque) {
+                               qjs_bool_t is_handled, void *opaque) {
     Globals *globals = (Globals *) opaque;
     // An interrupt takes precedence over any rejection, don't run more JS for it.
     if (!is_handled && qjs_interrupt_poll(globals->interrupt_state)) {

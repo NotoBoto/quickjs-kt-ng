@@ -1,5 +1,7 @@
 /// Based on https://github.com/cashapp/zipline/blob/trunk/zipline/build.gradle.kts
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -12,6 +14,9 @@ plugins {
 kotlin {
     androidTarget {
         publishLibraryVariants("release")
+        // Unison spike: run commonTest as instrumented tests on a device/emulator
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
     jvm()
 
@@ -60,6 +65,14 @@ kotlin {
             dependsOn(jniMain)
         }
 
+        val androidInstrumentedTest by getting {
+            dependencies {
+                implementation(libs.androidx.junit)
+                implementation("androidx.test:runner:1.6.2")
+                implementation(libs.kotlin.test.junit)
+            }
+        }
+
         targets.withType<KotlinNativeTarget> {
             val main by compilations.getting
 
@@ -82,6 +95,7 @@ val cmakeFile = file("native/CMakeLists.txt")
 android {
     namespace = "com.dokar.quickjs"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
